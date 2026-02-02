@@ -3,15 +3,23 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# --- SECCIÓN DE SEGURIDAD ---
-# 1. Creamos la carpeta (Imprescindible porque al borrar el archivo, Git pudo borrar la carpeta)
+# --- AQUÍ ESTÁ EL ARREGLO DE LA BASE DE DATOS ---
 RUN mkdir -p src/main/resources
+# 1. Borramos el viejo
+RUN rm -f src/main/resources/application.properties
 
-# 2. Creamos el archivo limpio (Imprescindible para que Spring arranque)
-RUN echo "server.port=9090" > src/main/resources/application.properties
-# ----------------------------
+# 2. Creamos el nuevo CON TODA LA CONFIGURACIÓN (Línea a línea)
+# IMPORTANTE: Si tu contraseña no es '1234', cámbiala aquí abajo
+RUN echo "server.port=9090" > src/main/resources/application.properties && \
+    echo "spring.datasource.url=jdbc:mysql://retrogames-db:3306/retrogames" >> src/main/resources/application.properties && \
+    echo "spring.datasource.username=root" >> src/main/resources/application.properties && \
+    echo "spring.datasource.password=1234" >> src/main/resources/application.properties && \
+    echo "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver" >> src/main/resources/application.properties && \
+    echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties && \
+    echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect" >> src/main/resources/application.properties
+# ------------------------------------------------
 
-# Compilación IGNORANDO tests (Mano de santo para 'exit code: 1')
+# Compilación
 RUN mvn clean package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
 
 FROM eclipse-temurin:21-jre-jammy
