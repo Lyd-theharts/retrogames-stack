@@ -6,8 +6,7 @@ COPY src ./src
 
 # --- AQUÍ ESTÁ LA MAGIA PARA QUE NO FALLE ---
 # 1. Creamos la carpeta (Esto arregla el error 'exit code: 2')
-RUN mkdir -p src/main/resources
-
+RUN mkdir -p src/main/resources # Forzamos actualizacion
 # 2. Creamos el archivo limpio (Esto arregla el error de caracteres raros)
 RUN echo "server.port=9090" > src/main/resources/application.properties
 # ---------------------------------------------
