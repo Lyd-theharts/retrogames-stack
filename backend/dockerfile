@@ -1,20 +1,17 @@
-# ETAPA 1: CONSTRUCCIÓN
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# --- LA SOLUCIÓN QUIRÚRGICA ---
-# 1. Forzamos el borrado del archivo corrupto (por si existe)
-RUN rm -f src/main/resources/application.properties
-# 2. Creamos uno nuevo, 100% limpio y texto plano, al vuelo
-RUN echo "server.port=9090" > src/main/resources/application.properties
-# ------------------------------
+# 1. CREAMOS LA CARPETA (Evita el error 'exit code: 2')
+RUN mkdir -p src/main/resources
 
-# Ahora compilamos. Maven usará el archivo nuevo que acabamos de crear.
+# 2. Creamos el archivo limpio (Evita el error de caracteres raros)
+RUN echo "server.port=9090" > src/main/resources/application.properties
+
+# 3. Compilamos (Evita el error de tests)
 RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true
 
-# ETAPA 2: EJECUCIÓN
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
