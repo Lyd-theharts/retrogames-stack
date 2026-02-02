@@ -1,21 +1,26 @@
 # --- ETAPA 1: CONSTRUCCIÓN (MAVEN + JAVA 21) ---
-# Usamos una imagen específica de Maven con Java 21 (Amazon Corretto)
-FROM maven:3.9.6-amazoncorretto-21 AS build
+# Usamos Eclipse Temurin 21, que es la versión robusta para tu proyecto
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
+
+# 1. Copiamos archivos de configuración primero
 COPY pom.xml .
+
+# 2. Copiamos el código fuente
 COPY src ./src
 
-# EL COMANDO MÁGICO:
-# -Dmaven.test.skip=true : NO compila los tests (evita errores de código de test)
-# -DskipTests : A veces no es suficiente, por eso usamos el de arriba.
-RUN mvn clean package -Dmaven.test.skip=true
+# 3. Compilamos.
+# -DskipTests: Salta la ejecución de tests (vital para que no falle buscando la BD)
+# -Dmaven.javadoc.skip=true: Ahorra tiempo no generando documentación
+RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true
 
-# --- ETAPA 2: EJECUCIÓN (JAVA 21) ---
-FROM amazoncorretto:21
+# --- ETAPA 2: EJECUCIÓN (JAVA 21 LIGERO) ---
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-# Copiamos el .jar generado
+
+# Copiamos el .jar generado en la etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Tu aplicación usa el puerto 9090
+# Configuración de puerto (El 9090 que vimos en tu properties)
 EXPOSE 9090
 ENTRYPOINT ["java", "-jar", "app.jar"]
