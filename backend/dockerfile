@@ -1,9 +1,20 @@
+# ETAPA 1: CONSTRUCCIÓN
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-# Compilamos saltando tests
+
+# --- LA SOLUCIÓN QUIRÚRGICA ---
+# 1. Forzamos el borrado del archivo corrupto (por si existe)
+RUN rm -f src/main/resources/application.properties
+# 2. Creamos uno nuevo, 100% limpio y texto plano, al vuelo
+RUN echo "server.port=9090" > src/main/resources/application.properties
+# ------------------------------
+
+# Ahora compilamos. Maven usará el archivo nuevo que acabamos de crear.
 RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true
+
+# ETAPA 2: EJECUCIÓN
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
