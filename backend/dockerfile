@@ -1,26 +1,12 @@
-# --- ETAPA 1: CONSTRUCCIÓN (MAVEN + JAVA 21) ---
-# Usamos Eclipse Temurin 21, que es la versión robusta para tu proyecto
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-
-# 1. Copiamos archivos de configuración primero
 COPY pom.xml .
-
-# 2. Copiamos el código fuente
 COPY src ./src
-
-# 3. Compilamos.
-# -DskipTests: Salta la ejecución de tests (vital para que no falle buscando la BD)
-# -Dmaven.javadoc.skip=true: Ahorra tiempo no generando documentación
+# Compilamos saltando tests
 RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true
 
-# --- ETAPA 2: EJECUCIÓN (JAVA 21 LIGERO) ---
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-
-# Copiamos el .jar generado en la etapa anterior
 COPY --from=build /app/target/*.jar app.jar
-
-# Configuración de puerto (El 9090 que vimos en tu properties)
 EXPOSE 9090
 ENTRYPOINT ["java", "-jar", "app.jar"]
