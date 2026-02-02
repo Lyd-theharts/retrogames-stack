@@ -1,17 +1,21 @@
+# USAMOS JAVA 21
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# 1. CREAMOS LA CARPETA (Evita el error 'exit code: 2')
+# --- AQUÍ ESTÁ LA MAGIA PARA QUE NO FALLE ---
+# 1. Creamos la carpeta (Esto arregla el error 'exit code: 2')
 RUN mkdir -p src/main/resources
 
-# 2. Creamos el archivo limpio (Evita el error de caracteres raros)
+# 2. Creamos el archivo limpio (Esto arregla el error de caracteres raros)
 RUN echo "server.port=9090" > src/main/resources/application.properties
+# ---------------------------------------------
 
-# 3. Compilamos (Evita el error de tests)
+# Compilamos saltando tests
 RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true
 
+# ETAPA 2: EJECUCIÓN
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
