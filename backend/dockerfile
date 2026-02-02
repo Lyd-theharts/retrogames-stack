@@ -3,28 +3,25 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# --- CONFIGURACIÓN EXACTA SEGÚN TU DOCKER-COMPOSE ---
+# --- VOLVEMOS AL PUERTO 9090 ---
 RUN mkdir -p src/main/resources
 RUN rm -f src/main/resources/application.properties
 
-# 1. Host: db (coincide con el servicio 'db' del docker-compose)
-# 2. Database: retrogames_db (coincide con MYSQL_DATABASE)
-# 3. Password: root (coincide con MYSQL_ROOT_PASSWORD)
-
-RUN echo "server.port=8080" > src/main/resources/application.properties && \
+# IMPORTANTE: Port 9090, DB retrogames_db, User root, Pass root
+RUN echo "server.port=9090" > src/main/resources/application.properties && \
     echo "spring.datasource.url=jdbc:mysql://db:3306/retrogames_db?allowPublicKeyRetrieval=true&useSSL=false" >> src/main/resources/application.properties && \
     echo "spring.datasource.username=root" >> src/main/resources/application.properties && \
     echo "spring.datasource.password=root" >> src/main/resources/application.properties && \
     echo "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver" >> src/main/resources/application.properties && \
     echo "spring.jpa.hibernate.ddl-auto=update" >> src/main/resources/application.properties && \
     echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect" >> src/main/resources/application.properties
-# ----------------------------------------------------
+# -------------------------------
 
-# Compilación
 RUN mvn clean package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
+# Exponemos el 9090
+EXPOSE 9090
 ENTRYPOINT ["java", "-jar", "app.jar"]
