@@ -1,15 +1,16 @@
-# USAMOS JAVA 17 (La versión más compatible)
-FROM maven:3.8.5-openjdk-17 AS build
+# ETAPA 1: Construcción con Maven y JAVA 21
+FROM maven:3.9.6-amazoncorretto-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-# EL TRUCO: -DskipTests evita que intente conectar a la BD al compilar
+# Compilamos saltando los tests para evitar errores de conexión
 RUN mvn clean package -DskipTests
 
-# ETAPA 2: Ejecución
-FROM openjdk:17-jdk-slim
+# ETAPA 2: Ejecución con JAVA 21
+FROM amazoncorretto:21
 WORKDIR /app
+# Copiamos el .jar que se creó arriba
 COPY --from=build /app/target/*.jar app.jar
-# AQUÍ CAMBIAMOS AL PUERTO 9090 (El tuyo real)
+# Importante: Tu app usa el puerto 9090
 EXPOSE 9090
 ENTRYPOINT ["java", "-jar", "app.jar"]
