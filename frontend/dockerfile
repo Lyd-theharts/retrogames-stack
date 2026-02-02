@@ -1,4 +1,4 @@
-# CAMBIO CLAVE: Usamos Node 22 en lugar de 18
+# ETAPA 1: Construcción (Node 22)
 FROM node:22-alpine as build
 WORKDIR /app
 COPY package*.json ./
@@ -8,5 +8,10 @@ RUN npm run build --prod
 
 # ETAPA 2: Servidor Web (Nginx)
 FROM nginx:alpine
-COPY --from=build /app/dist/retrogames /usr/share/nginx/html
+
+# --- EL CAMBIO CLAVE ESTÁ AQUÍ ---
+# Añadimos '/browser' al final de la ruta de origen
+COPY --from=build /app/dist/retrogames/browser /usr/share/nginx/html
+# ---------------------------------
+
 EXPOSE 80
