@@ -1,15 +1,15 @@
-# ETAPA 1: Construcción (Usamos Java 21 para asegurar compatibilidad)
-FROM maven:3.9.6-amazoncorretto-21 AS build
+# USAMOS JAVA 17 (La versión más compatible)
+FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-# Usamos -Dmaven.test.skip=true que es más agresivo que -DskipTests
-# Esto evita que intente siquiera compilar los tests
-RUN mvn clean package -Dmaven.test.skip=true
+# EL TRUCO: -DskipTests evita que intente conectar a la BD al compilar
+RUN mvn clean package -DskipTests
 
-# ETAPA 2: Ejecución (Usamos Java 21 también)
-FROM amazoncorretto:21
+# ETAPA 2: Ejecución
+FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
+# AQUÍ CAMBIAMOS AL PUERTO 9090 (El tuyo real)
+EXPOSE 9090
 ENTRYPOINT ["java", "-jar", "app.jar"]
