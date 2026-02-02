@@ -1,16 +1,19 @@
 version: '3.8'
 
 services:
-  # --- 1. TU BACKEND (Spring Boot) ---
+  # --- BACKEND ---
   backend:
     build: ./backend
     container_name: retrogames-api
     ports:
-      - "8080:8080"
+      - "9090:9090"  # <--- CAMBIO IMPORTANTE: Puerto 9090
     environment:
-      # Conecta con el servicio 'db' definido abajo
+      # Sobrescribimos la config de tu archivo properties:
+      # 1. Usamos 'db' en vez de 'localhost'
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/retrogames_db?allowPublicKeyRetrieval=true&useSSL=false
+      # 2. Tu usuario es root
       - SPRING_DATASOURCE_USERNAME=root
+      # 3. Tu contraseña estaba vacía en el archivo, aquí definimos una para Docker
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
@@ -18,7 +21,7 @@ services:
     networks:
       - app-network
 
-  # --- 2. TU FRONTEND (Angular + Nginx) ---
+  # --- FRONTEND ---
   frontend:
     build: ./frontend
     container_name: retrogames-web
@@ -29,13 +32,13 @@ services:
     networks:
       - app-network
 
-  # --- 3. BASE DE DATOS (MySQL) ---
+  # --- BASE DE DATOS ---
   db:
     image: mysql:8.0
     container_name: retrogames-db
     environment:
       - MYSQL_DATABASE=retrogames_db
-      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root  # <--- Esta contraseña debe coincidir con la de arriba
     ports:
       - "3306:3306"
     volumes:
