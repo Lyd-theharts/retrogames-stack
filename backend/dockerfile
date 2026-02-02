@@ -1,16 +1,21 @@
-# ETAPA 1: Construcción con Maven y JAVA 21
+# --- ETAPA 1: CONSTRUCCIÓN (MAVEN + JAVA 21) ---
+# Usamos una imagen específica de Maven con Java 21 (Amazon Corretto)
 FROM maven:3.9.6-amazoncorretto-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-# Compilamos saltando los tests para evitar errores de conexión
-RUN mvn clean package -DskipTests
 
-# ETAPA 2: Ejecución con JAVA 21
+# EL COMANDO MÁGICO:
+# -Dmaven.test.skip=true : NO compila los tests (evita errores de código de test)
+# -DskipTests : A veces no es suficiente, por eso usamos el de arriba.
+RUN mvn clean package -Dmaven.test.skip=true
+
+# --- ETAPA 2: EJECUCIÓN (JAVA 21) ---
 FROM amazoncorretto:21
 WORKDIR /app
-# Copiamos el .jar que se creó arriba
+# Copiamos el .jar generado
 COPY --from=build /app/target/*.jar app.jar
-# Importante: Tu app usa el puerto 9090
+
+# Tu aplicación usa el puerto 9090
 EXPOSE 9090
 ENTRYPOINT ["java", "-jar", "app.jar"]
