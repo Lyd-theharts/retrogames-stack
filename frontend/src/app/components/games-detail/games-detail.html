@@ -1,0 +1,153 @@
+@if (loaded) {
+  <div class="row">
+    <div class="col-12">
+      <h2 class="text-center text-secondary">{{ idGame ? 'Editando ' + titulo?.value : 'Nuevo Videojuego' }}</h2>
+    </div>
+
+    <div class="col-md-7">
+      <div class="card shadow-sm border-0 p-4">
+        <form [formGroup]="formGame" (ngSubmit)="onSubmit()">
+
+          <div class="form-floating mb-3">
+            <input formControlName="titulo"
+                   type="text"
+                   class="form-control"
+                   id="Titulo"
+                   placeholder="Titulo">
+            <label for="titulo">Titulo</label>
+
+            @if (titulo?.invalid && (titulo?.dirty || titulo?.touched)) {
+              <div class="alert alert-danger" role="alert">
+                @if (titulo?.errors?.['required']) {
+                  El nombre es obligatorio.
+                }
+                @if (titulo?.errors?.['minLength']) {
+                  El nombre debe tener al menos 3 caracteres.
+                }
+                @if (titulo?.errors?.['notOnlyWhiteSpace']) {
+                  El nombre no puede tener espacios en blanco.
+                }
+                @if (titulo?.errors?.['forbiddenName']) {
+                  El nombre no puede contener la palabra 'sex'.
+                }
+              </div>
+            }
+          </div>
+
+          <div class="form-floating mb-3">
+            <input formControlName="precio" type="number" class="form-control" id="precio" placeholder="precio">
+            <label for="precio">Precio</label>
+
+            @if (precio?.invalid && precio?.touched) {
+              <div class="text-danger small">
+                <div class="alert alert-danger" role="alert">
+                  @if (precio?.errors?.['required']) {
+                    <div>Obligatorio.</div>
+                  }
+                  @if (precio?.errors?.['min']) {
+                    <div>Mayor que 0.</div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="form-floating mb-3">
+            <input formControlName="plataforma" plataforma
+                   type="text"
+                   class="form-control"
+                   id="plataforma"
+                   placeholder="plataforma">
+            <label for="plataforma">plataforma</label>
+
+            @if (plataforma?.invalid && (plataforma?.dirty || plataforma?.touched)) {
+              <div class="alert alert-danger" role="alert">
+                @if (plataforma?.errors?.['required']) {
+                  La plataforma es obligatorio.
+                }
+                @if (plataforma?.errors?.['minLength']) {
+                  La plataforma debe tener al menos 3 caracteres.
+                }
+                @if (plataforma?.errors?.['notOnlyWhiteSpace']) {
+                  La plataforma no puede tener espacios en blanco.
+                }
+                @if (plataforma?.errors?.['forbiddenName']) {
+                  La plataforma no puede contener la palabra 'sex'.
+                }
+              </div>
+            }
+          </div>
+
+          <div class="row g-2">
+            <div class="col-8">
+              <div class="form-floating mb-3">
+                <input formControlName="imagenUrl" type="text" class="form-control" id="img" placeholder="img">
+                <label for="imagenUrl">Imagen URL</label>
+
+                @if (imagenUrl?.invalid && (imagenUrl?.dirty || imagenUrl?.touched)) {
+                  <div class="alert alert-danger mt-2" role="alert">
+                    @if (imagenUrl?.errors?.['required']) {
+                      <span>El img es obligatorio.</span>
+                    }
+                    @if (imagenUrl?.errors?.['minLength']) {
+                      <span>El img debe tener al menos 3 caracteres.</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="col-4">
+              <img [src]="imagenUrl?.value" style="width: 100px" alt="">
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button class="btn btn-success" type="submit">EDIT</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <h4 class="text-muted mb-3 text-center">Vista Previa</h4>
+      <div class="card shadow h-100 pointer">
+        <div class="card-header">
+          <img class="img-fluid" [src]="imagenUrl?.value" [alt]="titulo?.value">
+          <div class="card-header-title mt-2">
+            <p class="fw-bold text-muted">{{ titulo?.value }}</p>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column g-2">
+          <p class="fw-bold text-primary">Plataforma: <span class="text-muted">{{ plataforma?.value }}</span></p>
+          <p class="fw-bold text-primary">Precio: <span class="text-muted">€{{ precio?.value }}</span></p>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-end p-2 ">
+            <i class="bi bi-cart-fill text-muted fs-2 me-2"></i>
+            <div class="bi bi-trash-fill text-danger fs-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-12 d-flex justify-content-center">
+    @if (show) {
+      <ngb-toast class="toast-container position-fixed top-0 end-50 p-3" style="z-index: 1200"
+                 [autohide] = true
+                 [delay]="1000"
+                 [class] = "toast.className">
+        {{toast.text}}
+      </ngb-toast>
+    }
+
+  </div>
+}@else {
+  <div class="d-flex justify-content-center mt-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+}

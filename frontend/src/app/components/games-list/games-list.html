@@ -1,0 +1,63 @@
+@if (games()) {
+  <div class="row my-3">
+    <div class="col-8">
+      <div class="offset-4 input-group my-3 ">
+        <span class="input-group-text ">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="search" class="form-control" placeholder="Search" (input)="buscar($event)">
+      </div>
+    </div>
+
+  </div>
+  <div class="row my-3">
+
+
+    @for (game of games(); track game.id) {
+      <div class="col-md-4 my-2">
+        <div class="card shadow h-100 pointer" [routerLink]="'/games-detail/'+game.id">
+          <div class="card-header">
+            <img class="img-fluid" [src]="game.imagenUrl" [alt]="game.titulo">
+            <div class="card-header-title mt-2"><p class="fw-bold text-muted">{{ game.titulo }}</p></div>
+          </div>
+          <div class="card-body d-flex flex-column g-2">
+
+            <p class="fw-bold text-primary">Plataforma: <span class="text-muted">{{ game.plataforma }}</span></p>
+            <p class="fw-bold text-primary">Precio: <span class="text-muted">€{{ game.precio }}</span></p>
+
+          </div>
+          <div class="card-footer">
+            <div class="d-flex justify-content-end p-2 ">
+              <i class="bi bi-cart-fill text-muted fs-2 me-2" (click)="addToCart(game)"
+                 (click)="$event.stopPropagation()"></i>
+              <div class="bi bi-trash-fill text-danger fs-2" (click)="delete(game)"
+                   (click)="$event.stopPropagation()"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    }
+  </div>
+
+  <div class="col-12 d-flex justify-content-center">
+    @if (show) {
+      <ngb-toast class="toast-container position-fixed top-0 end-50 p-3" style="z-index: 1200"
+                 [autohide] = true
+                 [delay]="1000"
+                 [class] = "toast.className">
+        {{toast.text}}
+      </ngb-toast>
+    }
+
+  </div>
+
+
+} @else {
+  <div class="d-flex justify-content-center mt-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+}

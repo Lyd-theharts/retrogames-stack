@@ -1,0 +1,25 @@
+/* Estado NORMAL */
+.pointer {
+  /* "tarda 1 segundo en completar la acción" */
+  transition: all 1s ease-in-out;
+
+  /* Es buena práctica poner un borde transparente inicial
+     para que la caja no "baile" cuando aparezca el borde de color */
+  border: 1px solid transparent;
+}
+
+/* Estado HOVER (Al pasar el ratón) */
+.pointer:hover {
+  /* "aumentan su tamaño un 5%" -> 1.00 es el 100%, 1.05 es el 105% */
+  transform: scale(1.05);
+
+  /* "se les aplica un borde de color #7addf1" */
+  border: 1px solid #7addf1;
+
+  cursor: pointer;
+
+  /* Opcional: Esto ayuda a que, al crecer, la tarjeta quede
+     por encima de las vecinas y no se vea cortada */
+  z-index: 10;
+  position: relative;
+}

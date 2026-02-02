@@ -1,0 +1,116 @@
+package com.angular.retrogames.controller;
+
+import com.angular.retrogames.entity.Juego;
+import com.angular.retrogames.repository.JuegoRepository;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+import java.util.Optional;
+
+//con el ResponseEntity
+
+@RestController
+@RequestMapping("/api/juegos")
+@CrossOrigin(origins = "*") // ¡Importante para que Angular no se queje!
+public class JuegoController {
+
+    @Autowired
+    private JuegoRepository repo;
+
+    // 1. OBTENER TODOS (Para el listado inicial en Angular)
+    // GET http://localhost:8080/api/juegos
+    @GetMapping
+    public List<Juego> listar() {
+        return repo.findAll();
+    }
+
+    // 2. OBTENER UNO POR ID (Para la página de "Detalles" o "Editar" en Angular)
+    // GET http://localhost:8080/api/juegos/5
+    @GetMapping("/{id}")
+    public ResponseEntity<Juego> obtenerPorId(@PathVariable Long id) {
+        Optional<Juego> opt = repo.findById(id);
+
+        // Si existe, devolvemos el juego con código 200 OK
+        // Si no existe, devolvemos 404 Not Found
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        /*// VERSIÓN TRADICIONAL (HACE LO MISMO)
+        if (opt.isPresent()) {
+        // Si la caja tiene juego, sácalo y envuélvelo en un 200 OK
+            return ResponseEntity.ok(opt.get());
+        } else {
+         // Si la caja está vacía, devuelve un 404 Not Found
+    return ResponseEntity.notFound().build();
+    }*/
+    }
+
+    // 3. BUSCAR POR NOMBRE (Para la barra de búsqueda en Angular)
+    // GET http://localhost:8080/api/juegos/buscar/mario
+    @GetMapping("/buscar/{nombre}")
+    public List<Juego> buscarPorNombre(@PathVariable String nombre) {
+        return repo.findByTituloContainingIgnoreCase(nombre);
+    }
+
+    // 4. CREAR UNO NUEVO (Para el formulario de "Nuevo Juego")
+    // POST http://localhost:8080/api/juegos
+    @PostMapping
+    public Juego guardar(@RequestBody Juego juego) {
+        return repo.save(juego); // Si el ID es null, hace INSERT
+    }
+
+    // 5. ACTUALIZAR UNO (Para el botón "Guardar Cambios" al editar)
+    // PUT http://localhost:8080/api/juegos/5
+    @PutMapping("/{id}")
+    public ResponseEntity<Juego> actualizar(@PathVariable Long id, @RequestBody Juego juegoDatosNuevos) {
+        // Primero buscamos si existe el juego que queremos editar
+        Optional<Juego> opt = repo.findById(id);
+
+        if (opt.isPresent()) {
+            Juego juegoExistente = opt.get();
+            // Actualizamos los campos con los datos nuevos que llegan del formulario
+            juegoExistente.setTitulo(juegoDatosNuevos.getTitulo());
+            juegoExistente.setPlataforma(juegoDatosNuevos.getPlataforma());
+            juegoExistente.setPrecio(juegoDatosNuevos.getPrecio());
+            juegoExistente.setImagenUrl(juegoDatosNuevos.getImagenUrl());
+
+            // Guardamos (al tener ID, Spring sabe que es un UPDATE)
+            repo.save(juegoExistente);
+            return ResponseEntity.ok(juegoExistente);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // 6. BORRAR UNO (Para el botón de la papelera)
+    // DELETE http://localhost:8080/api/juegos/5
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> borrar(@PathVariable Long id) {
+        if (repo.existsById(id)) {
+            repo.deleteById(id);
+            return ResponseEntity.noContent().build(); // 204 No Content (Borrado OK)
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // 7. ENDPOINT DE DOCUMENTACIÓN (JSON SIMPLE)
+    // GET http://localhost:9090/api/juegos/instrucciones
+    @GetMapping("/instrucciones")
+    public java.util.Map<String, String> verInstrucciones() {
+        // Usamos LinkedHashMap para que guarde el orden en el que lo escribimos
+        java.util.Map<String, String> guia = new java.util.LinkedHashMap<>();
+
+        guia.put("titulo", "🕹️ API RETROGAMES - DOCUMENTACIÓN");
+        guia.put("1. LISTAR (GET)", "/api/juegos");
+        guia.put("2. DETALLE (GET)", "/api/juegos/{id}");
+        guia.put("3. BUSCAR (GET)", "/api/juegos/buscar/{nombre}");
+        guia.put("4. CREAR (POST)", "/api/juegos (Body: JSON sin ID)");
+        guia.put("5. EDITAR (PUT)", "/api/juegos/{id} (Body: JSON con datos)");
+        guia.put("6. BORRAR (DELETE)", "/api/juegos/{id}");
+        guia.put("nota", "Servidor corriendo en el puerto 9090");
+
+        return guia;
+    }
+
+}
